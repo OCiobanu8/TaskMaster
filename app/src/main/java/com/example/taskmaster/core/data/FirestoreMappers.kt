@@ -3,7 +3,10 @@ package com.example.taskmaster.core.data
 import com.example.taskmaster.core.model.Project
 import com.example.taskmaster.core.model.TaskInstance
 import com.example.taskmaster.core.model.TaskStatus
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
+import java.time.Instant
+import java.util.Date
 
 fun DocumentSnapshot.toProject(): Project? {
     return projectFromMap(id = id, data = data.orEmpty())
@@ -36,6 +39,18 @@ fun taskInstanceFromMap(id: String, data: Map<String, Any?>): TaskInstance? {
         projectId = projectId,
         title = title,
         assigneeUserId = assigneeUserId,
-        status = status
+        status = status,
+        dueAt = mapInstant(data["dueAt"]),
+        createdAt = mapInstant(data["createdAt"])
     )
+}
+
+private fun mapInstant(rawValue: Any?): Instant? {
+    return when (rawValue) {
+        null -> null
+        is Timestamp -> rawValue.toDate().toInstant()
+        is Date -> rawValue.toInstant()
+        is Number -> Instant.ofEpochMilli(rawValue.toLong())
+        else -> null
+    }
 }

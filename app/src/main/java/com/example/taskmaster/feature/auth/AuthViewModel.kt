@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.taskmaster.core.auth.AuthRepository
+import com.example.taskmaster.core.auth.mapAuthErrorToUserMessage
 import com.example.taskmaster.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +41,7 @@ class AuthViewModel(
             _uiState.update { state ->
                 state.copy(
                     loading = false,
-                    errorMessage = result.exceptionOrNull()?.message
+                    errorMessage = mapAuthErrorToUserMessage(result.exceptionOrNull())
                 )
             }
         }

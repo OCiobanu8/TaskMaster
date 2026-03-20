@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,11 +13,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,52 +31,27 @@ import com.example.taskmaster.core.model.Project
 @Composable
 fun ProjectsScreen(
     uiState: ProjectsUiState,
+    contentPadding: PaddingValues,
     onCreateProject: (String) -> Unit,
-    onOpenProject: (Project) -> Unit,
-    onSignOut: () -> Unit
+    onOpenProject: (Project) -> Unit
 ) {
+    var showCreateSheet by remember { mutableStateOf(false) }
     var projectName by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Projects") },
-                actions = {
-                    TextButton(onClick = onSignOut) {
-                        Text("Sign out")
-                    }
-                }
-            )
+        modifier = Modifier.padding(contentPadding),
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showCreateSheet = true }) {
+                Text("+")
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = projectName,
-                    onValueChange = { projectName = it },
-                    label = { Text("Project name") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-                Button(
-                    onClick = {
-                        onCreateProject(projectName)
-                        projectName = ""
-                    },
-                    enabled = projectName.isNotBlank() && !uiState.loading
-                ) {
-                    Text("Create")
-                }
-            }
-
             if (uiState.loading) {
                 CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
             }
@@ -90,7 +64,7 @@ fun ProjectsScreen(
             }
 
             LazyColumn(
-                contentPadding = PaddingValues(top = 16.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(uiState.projects, key = { it.id }) { project ->
@@ -98,6 +72,37 @@ fun ProjectsScreen(
                         project = project,
                         onClick = { onOpenProject(project) }
                     )
+                }
+            }
+        }
+    }
+
+    if (showCreateSheet) {
+        ModalBottomSheet(onDismissRequest = { showCreateSheet = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = "Create project")
+                OutlinedTextField(
+                    value = projectName,
+                    onValueChange = { projectName = it },
+                    label = { Text("Project name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = {
+                        onCreateProject(projectName)
+                        projectName = ""
+                        showCreateSheet = false
+                    },
+                    enabled = projectName.isNotBlank() && !uiState.loading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Create")
                 }
             }
         }
