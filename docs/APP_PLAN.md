@@ -69,3 +69,22 @@ Ship v1 as "MVP + gamification basics" (points, streaks, leaderboard), then add 
 - Calendar integration uses dedicated app-managed calendars (not arbitrary edits across all calendars).
 - "Points + steaks + team leaderboard" interpreted as points + streaks + per-project leaderboard.
 - Planning assistant is deferred to post-v1, but data model and sync logs are designed to support it.
+
+## Vertical Slice Acceptance Criteria (Kickoff)
+- Auth:
+  - User can sign in with Google and app shows authenticated state.
+  - User can sign out and app returns to sign-in screen.
+- Projects:
+  - Authenticated user can create a project.
+  - Created project appears in the projects list for the current user.
+  - A corresponding `projectMembers` owner row is created at project creation time.
+- Tasks:
+  - User can open a project task board and create a task assigned to self.
+  - Task list renders persisted Firestore tasks for the selected project.
+  - Status progression works as `todo -> in_progress -> done`; skip sets `skipped`.
+- Navigation:
+  - App routes include `SignIn`, `Projects`, and `TaskBoard`.
+  - Successful auth transitions to `Projects`; opening a project transitions to `TaskBoard`.
+- Security:
+  - Firestore rules are defined for `projects`, `projectMembers`, and `taskInstances` with member-scoped access.
+  - Emulator-backed integration test exists for member-allowed/non-member-denied task access.
