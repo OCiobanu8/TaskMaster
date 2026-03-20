@@ -1,0 +1,75 @@
+package com.example.taskmaster.core.data
+
+import com.example.taskmaster.core.model.TaskInstance
+import com.example.taskmaster.core.model.TaskStatus
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+
+class FirebaseTaskRepository(
+    private val firestore: FirebaseFirestore
+) : TaskRepository {
+
+    override suspend fun createTask(
+        projectId: String,
+        title: String,
+        assigneeUserId: String
+    ): Result<TaskInstance> {
+        return runCatching {
+            val docRef = firestore.collection(FirestoreCollections.TASK_INSTANCES).document()
+            val task = TaskInstance(
+                id = docRef.id,
+                projectId = projectId,
+                title = title,
+                assigneeUserId = assigneeUserId,
+                status = TaskStatus.TODO
+            )
+
+            docRef.set(
+                mapOf(
+                    "projectId" to task.projectId,
+                    "title" to task.title,
+                    "assigneeUserId" to task.assigneeUserId,
+                    "status" to task.status.name,
+                    "createdAt" to FieldValue.serverTimestamp(),
+                    "updatedAt" to FieldValue.serverTimestamp()
+                )
+            ).await()
+            task
+        }
+    }
+
+    override fun observeTasks(projectId: String): Flow<List<TaskInstance>> = callbackFlow {
+        val registration: ListenerRegistration = firestore.collection(FirestoreCollections.TASK_INSTANCES)
+            .whereEqualTo("projectId", projectId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val tasks = snapshot?.documents.orEmpty().mapNotNull { it.toTaskInstance() }
+                trySend(tasks.sortedBy { it.title.lowercase() })
+            }
+
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun updateTaskStatus(taskId: String, status: TaskStatus): Result<Unit> {
+        return runCatching {
+            firestore.collection(FirestoreCollections.TASK_INSTANCES)
+                .document(taskId)
+                .update(
+                    mapOf(
+                        "status" to status.name,
+                        "updatedAt" to FieldValue.serverTimestamp()
+                    )
+                )
+                .await()
+            Unit
+        }
+    }
+}
