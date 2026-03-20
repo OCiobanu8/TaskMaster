@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.taskmaster.core.auth.AuthRepository
 import com.example.taskmaster.core.data.ProjectRepository
+import com.example.taskmaster.core.debug.formatDebugError
 import com.example.taskmaster.core.model.Project
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,7 +54,7 @@ class ProjectsViewModel(
             _uiState.update { state ->
                 state.copy(
                     loading = false,
-                    errorMessage = result.exceptionOrNull()?.message
+                    errorMessage = formatDebugError(result.exceptionOrNull())
                 )
             }
         }

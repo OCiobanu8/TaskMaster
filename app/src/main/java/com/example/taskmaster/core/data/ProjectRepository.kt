@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface ProjectRepository {
     suspend fun createProject(name: String): Result<Project>
     fun observeProjects(userId: String): Flow<List<Project>>
+    suspend fun deleteProject(projectId: String): Result<Unit>
 }

@@ -1,6 +1,5 @@
 package com.example.taskmaster.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -11,33 +10,43 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+private val ColorErrorLight = androidx.compose.ui.graphics.Color(0xFFBA1A1A)
+private val ColorErrorDark = androidx.compose.ui.graphics.Color(0xFFFFB4AB)
+
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Apricot,
+    onPrimary = Night,
+    secondary = Slate,
+    onSecondary = SoftWhite,
+    tertiary = Ember,
+    onTertiary = SoftWhite,
+    background = Night,
+    onBackground = SoftWhite,
+    surface = Charcoal,
+    onSurface = SoftWhite,
+    error = ColorErrorDark,
+    onError = SoftWhite
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = SunsetCoral,
+    onPrimary = SoftWhite,
+    secondary = DeepNavy,
+    onSecondary = SoftWhite,
+    tertiary = Ember,
+    onTertiary = SoftWhite,
+    background = Sand,
+    onBackground = Charcoal,
+    surface = SoftWhite,
+    onSurface = Charcoal,
+    error = ColorErrorLight,
+    onError = SoftWhite
 )
 
 @Composable
 fun TaskMasterTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

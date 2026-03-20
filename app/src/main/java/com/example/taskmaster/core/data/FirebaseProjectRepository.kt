@@ -10,11 +10,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeout
 
 class FirebaseProjectRepository(
     private val firestore: FirebaseFirestore,
     private val authRepository: AuthRepository
 ) : ProjectRepository {
+    private companion object {
+        const val DELETE_TIMEOUT_MS = 10_000L
+    }
 
     override suspend fun createProject(name: String): Result<Project> {
         val currentUser = authRepository.currentUser().first()
@@ -69,5 +73,43 @@ class FirebaseProjectRepository(
             }
 
         awaitClose { registration.remove() }
+    }
+
+    override suspend fun deleteProject(projectId: String): Result<Unit> {
+        return runCatching {
+            withTimeout(DELETE_TIMEOUT_MS) {
+                deleteCollectionByField(
+                    collection = FirestoreCollections.TASK_INSTANCES,
+                    field = "projectId",
+                    value = projectId
+                )
+                deleteCollectionByField(
+                    collection = FirestoreCollections.PROJECT_MEMBERS,
+                    field = "projectId",
+                    value = projectId
+                )
+                firestore.collection(FirestoreCollections.PROJECTS)
+                    .document(projectId)
+                    .delete()
+                    .await()
+            }
+            Unit
+        }
+    }
+
+    private suspend fun deleteCollectionByField(
+        collection: String,
+        field: String,
+        value: String
+    ) {
+        val snapshot = firestore.collection(collection)
+            .whereEqualTo(field, value)
+            .get()
+            .await()
+        snapshot.documents.chunked(400).forEach { chunk ->
+            val batch = firestore.batch()
+            chunk.forEach { doc -> batch.delete(doc.reference) }
+            batch.commit().await()
+        }
     }
 }
