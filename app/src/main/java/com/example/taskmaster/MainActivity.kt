@@ -1,6 +1,5 @@
 package com.example.taskmaster
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.taskmaster.core.auth.GoogleSignInCoordinator
 import com.example.taskmaster.core.di.AppContainer
 import com.example.taskmaster.feature.auth.AuthViewModel
 import com.example.taskmaster.feature.auth.AuthViewModelFactory
@@ -125,13 +123,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    @Deprecated("Used for Google sign-in activity result forwarding.")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (GoogleSignInCoordinator.handleActivityResult(requestCode, data)) {
-            return
-        }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 }

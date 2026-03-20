@@ -31,7 +31,7 @@
   - [x] Sign-in flow verified
 
 ## Immediate Next Checklist (Current Sprint)
-- [ ] Replace deprecated Google Sign-In APIs with Credential Manager.
+- [x] Replace deprecated Google Sign-In APIs with Credential Manager.
 - [ ] Add Firestore composite indexes as needed from real query logs.
 - [ ] Expand rules integration tests for full member/non-member matrix.
 - [ ] Add UI instrumentation smoke tests for create project/task/status flow.
